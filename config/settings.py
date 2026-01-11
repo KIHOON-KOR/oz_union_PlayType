@@ -17,7 +17,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 SECRET_KEY = env("SECRET_KEY")
 DEBUG = env("DEBUG")
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["*"])
 
 # Application definition
 DJANGO_APPS = [
@@ -100,14 +100,22 @@ TIME_ZONE = "Asia/Seoul"
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = "static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+# 프로젝트 루트의 'static' 폴더를 정적 파일 경로로 인식시킴
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+]
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
 
 REST_FRAMEWORK = {
     # DRF가 스키마(문서) 생성기로 spectacular를 쓰도록 지정
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 # drf-spectacular 관련 설정
 SPECTACULAR_SETTINGS = {
@@ -135,3 +143,5 @@ SPECTACULAR_SETTINGS = {
         }
     ],
 }
+
+APPEND_SLASH = False
