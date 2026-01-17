@@ -19,6 +19,8 @@ DEBUG = env("DEBUG")
 
 ALLOWED_HOSTS = ["*"]
 
+AUTH_USER_MODEL = "user.User"
+
 # Application definition
 DJANGO_APPS = [
     "django.contrib.admin",
@@ -31,7 +33,7 @@ DJANGO_APPS = [
 
 THIRD_PARTY_APPS = [
     "rest_framework",
-    'drf_spectacular',
+    "drf_spectacular",
 ]
 
 CUSTOM_APPS: list[str] = [
@@ -100,14 +102,32 @@ TIME_ZONE = "Asia/Seoul"
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = "static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+# 프로젝트 루트의 'static' 폴더를 정적 파일 경로로 인식시킴
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+]
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
 
 REST_FRAMEWORK = {
     # DRF가 스키마(문서) 생성기로 spectacular를 쓰도록 지정
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        # "rest_framework.authentication.BasicAuthentication",
+        # "rest_framework.authentication.SessionAuthentication",
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
+    "EXCEPTION_HANDLER": "apps.core.exceptions.handler.custom_exception_handler",
 }
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 # drf-spectacular 관련 설정
 SPECTACULAR_SETTINGS = {
@@ -116,14 +136,26 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
     "COMPONENT_SPLIT_REQUEST": True,
-    "SWAGGER_UI_SETTINGS": {
+
+    "SWAGGER_UI_SETTINGS": """{
         "dom_id": "#swagger-ui",
-        "layout": "BaseLayout",
-        "deepLinking": True,  # API를 클릭할때 마다 SwaggerUI의 url이 변경됩니다. (특정 API url 공유시 유용하기때문에 True설정을 사용합니다)
-        "persistAuthorization": True,  # True 이면 SwaggerUI상 Authorize에 입력된 정보가 새로고침을 하더라도 초기화되지 않습니다.
-        "displayOperationId": True,  # True이면 API의 urlId 값을 노출합니다. 대체로 DRF api name둘과 일치하기때문에 api를 찾을때 유용합니다.
-        "filter": True,  # True 이면 Swagger UI에서 'Filter by Tag' 검색이 가능합니다
-    },
+        "layout": "StandaloneLayout",
+        "deepLinking": true,
+        "persistAuthorization": true,
+        "displayOperationId": true,
+        "filter": true,
+        
+        "urls": [
+            {url: "/static/swagger.yaml", name: "1. 기획서 (Static YAML)"},
+            {url: "/api/schema", name: "2. 실제 구현 코드 (Live Schema)"}
+        ],
+        
+        "presets": [
+            SwaggerUIBundle.presets.apis,
+            SwaggerUIStandalonePreset
+        ]
+    }""",
+
     "SERVE_PERMISSIONS": ["rest_framework.permissions.AllowAny"],
     "SECURITY": [
         {
@@ -134,4 +166,8 @@ SPECTACULAR_SETTINGS = {
             }
         }
     ],
+
 }
+
+APPEND_SLASH = False
+

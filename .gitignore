@@ -5,3 +5,9 @@ __pycache__/
 .idea/
 .env
 .DS_Store
+.coverage
+.python-version
+envs/
+.dmypy.json
+htmlcov/
+media/
