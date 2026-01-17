@@ -111,6 +111,7 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
+
 REST_FRAMEWORK = {
     # DRF가 스키마(문서) 생성기로 spectacular를 쓰도록 지정
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
@@ -135,6 +136,7 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
     "COMPONENT_SPLIT_REQUEST": True,
+
     "SWAGGER_UI_SETTINGS": """{
         "dom_id": "#swagger-ui",
         "layout": "StandaloneLayout",
@@ -153,6 +155,7 @@ SPECTACULAR_SETTINGS = {
             SwaggerUIStandalonePreset
         ]
     }""",
+
     "SERVE_PERMISSIONS": ["rest_framework.permissions.AllowAny"],
     "SECURITY": [
         {
@@ -163,6 +166,8 @@ SPECTACULAR_SETTINGS = {
             }
         }
     ],
+
 }
 
 APPEND_SLASH = False
+
