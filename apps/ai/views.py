@@ -1,34 +1,34 @@
-import os
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from openai import OpenAI
-from dotenv import load_dotenv
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from drf_spectacular.utils import extend_schema
 
-# .env 파일에서 환경 변수 로드
-load_dotenv()
-
-# OpenAI 클라이언트 초기화
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+from apps.ai.services import generate_and_save_summary
+from apps.ai.serializers import GameReviewSummarySerializer
 
 
-class ReviewAiAPIView(APIView):
-    def post(self, request):
-        user_prompt = request.data.get('prompt')
+class GameReviewSummaryAPIView(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
-        if not user_prompt:
-            return Response({"error": "Prompt is required"}, status=status.HTTP_400_BAD_REQUEST)
+    @extend_schema(
+        tags=["AI 요약"],
+        summary="게임 리뷰 AI 요약 생성 및 저장",
+        responses={201: GameReviewSummarySerializer},
+    )
+    def post(self, request, game_id):
+        """
+        특정 게임의 리뷰를 요약하여 저장하고 반환합니다.
+        POST 요청을 사용하는 이유는 서버 상태(DB)를 변경(저장)하기 때문입니다.
+        """
+        summary_instance = generate_and_save_summary(game_id=game_id)
 
-        try:
-            # OpenAI API 호출
-            response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[{"role": "user", "content": user_prompt}]
-            )
-            ai_message = response.choices[0].message.content
+        serializer = GameReviewSummarySerializer(summary_instance)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-            # 결과 반환
-            return Response({"result": ai_message}, status=status.HTTP_200_OK)
-
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+# ------------------------------------------------------------------------------
+# [코드 설명]
+# 1. POST Method: 요약문을 '생성'하고 '저장'하는 작업이므로 GET보다는 POST가 적합합니다.
+#    (만약 단순히 조회만 하고 저장하지 않는다면 GET을 씁니다.)
+# 2. Response: 저장된 모델 객체를 시리얼라이저를 통해 JSON으로 변환하여 반환합니다.
+# ------------------------------------------------------------------------------

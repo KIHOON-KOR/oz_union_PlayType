@@ -87,6 +87,9 @@ DATABASES = {
     }
 }
 
+# 5. Ai 설정(.env)
+GEMINI_API_KEY = env("GEMINI_API_KEY")
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
